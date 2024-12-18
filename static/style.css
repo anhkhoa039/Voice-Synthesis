@@ -1,0 +1,56 @@
+/* Background Image */
+[data-testid="stAppViewContainer"] {
+    /* background-image: url("data:image/jpg;base64,{base64_image}"); */
+    background-image: url("IMAGE_PLACEHOLDER"); 
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+/* Button Styles */
+/* Fixed Button Styles with Centering */
+.center-buttons {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    gap: 20px; /* Space between buttons */
+}
+
+div.stButton > button {
+    background-color: #4CAF50;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 8px 16px;
+    width: 200px;  /* Fixed width */
+    height: 50px;  /* Fixed height */
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+div.stButton > button:hover {
+    background-color: #45a049;
+    color: #fff;
+}
+
+
+
+/* Text Area and Selectbox Styling */
+div.stTextArea > label, div.stSelectbox > label {
+    color: rgb(0, 0, 0);
+    font-size: 16px;
+    font-weight: bold;
+}
+
+/* Header Styling */
+h1, h2, h3, h4, h5, h6 {
+    color: #FFD700; /* Gold color */
+    text-align: center;
+}
+
+/* Custom st.info box styles */
+div.stAlert {
+    background-color: #ffffff !important;  /* Light yellow */
+    color: #856404 !important;  /* Dark text color */
+    border-radius: 10px;  /* Rounded corners */
+}
