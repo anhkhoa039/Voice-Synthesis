@@ -3,6 +3,7 @@ import tempfile
 import os
 import glob
 import base64
+from datetime import datetime
 from utils import get_base64_image, load_css_with_image, load_text_from_file
 from config import opt
 
@@ -67,17 +68,25 @@ st.divider()
 st.header("3. Choose Audio Style")
 
 selected_style = None
+selected_style_file = None
+if 'selected_style' not in st.session_state:
+    st.session_state.selected_style = None
+if 'selected_style_file' not in st.session_state:
+    st.session_state.selected_style_file = None
+
 
 audio_styles = [item for item in os.listdir(AUDIO_STYLE_DIR) if os.path.isdir(os.path.join(AUDIO_STYLE_DIR, item))]
 col1, col2 = st.columns((3,7))
 with col1:
     selected_style = st.selectbox("Select an audio style:", audio_styles)
+    st.session_state.selected_style = selected_style
     st.success(f"Selected style: {selected_style}")
 
 sample_styles = os.listdir(AUDIO_STYLE_DIR + '/' + selected_style)
 with col2:
     selected_style_file = st.selectbox("Select an sample style:", sample_styles)
     selected_audio = os.path.join(AUDIO_STYLE_DIR,selected_style, selected_style_file)
+    st.session_state.selected_style_file = selected_audio
     st.audio(selected_audio, format="audio/wav")
     st.success(f"Selected style: {selected_style_file}")
 
@@ -164,7 +173,7 @@ def generate_long_audio(input_story, style_audio, save_file, lang='en'):
 # Section 3: Generate Audio
 # st.divider()
 st.header("4. Generate and Play Audio")
-selected_style = AUDIO_STYLE_DIR + '/' +st.session_state.selected_style
+# selected_style = AUDIO_STYLE_DIR + '/' +st.session_state.selected_style
 
 # Create a full-width button using Streamlit columns
 if st.button("Generate Audio"):
@@ -173,9 +182,10 @@ if st.button("Generate Audio"):
 
         ############################################################################################################
         # Generate WAV file
-        speaker_audio = selected_style
+        speaker_audio = st.session_state.selected_style_file
+        style = st.session_state.selected_style
+        output_filename = f"audio_{style}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
 
-        output_filename = "output.wav"
         save_path = os.path.join(OUTPUT_DIR, output_filename)
         # Process TTS
         with st.spinner("Generating audio... Please wait."):
