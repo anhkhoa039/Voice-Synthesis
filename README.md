@@ -3,7 +3,7 @@
 ### How to use
 First, clone the this repo
 ```bash
-git clone 
+git clone https://github.com/anhkhoa039/Voice-Synthesis.git
 ```
 Second, clone the XTTS-v2 model
 ```bash
@@ -15,5 +15,5 @@ pip install -r requirements.txt
 ```
 Run
 ```
-streamlit run main.py
+streamlit run src/main.py
 ```

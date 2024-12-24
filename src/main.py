@@ -19,7 +19,6 @@ st.set_page_config(page_title="Text-to-Speech Generator", layout="wide")
 st.title("Text to speech")
 
 # Load and encode the image
-# image_path = "static/clound.avif"  # Replace with your image file name
 base64_image = get_base64_image(IMAGE_BACKGROUND)
 
 if base64_image:
