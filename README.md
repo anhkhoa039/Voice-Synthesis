@@ -17,3 +17,6 @@ Run
 ```
 streamlit run src/main.py
 ```
+### TODO
+- [ ] Implement smarter segment sentences  
+- [ ] Implement multithread to reduce the processing time
