@@ -4,16 +4,18 @@ import os
 import glob
 import base64
 from utils import get_base64_image, load_css_with_image, load_text_from_file
+from config import opt
 
-AUDIO_STYLE_DIR = 'audio_style'
-AVAILABLE_STORY_DIR = 'available_story'
-OUTPUT_DIR = 'output_audio'
+AUDIO_STYLE_DIR = opt.AUDIO_STYLE_DIR
+AVAILABLE_STORY_DIR = opt.AVAILABLE_STORY_DIR
+OUTPUT_DIR = opt.OUTPUT_DIR
+ACCEPT_EXTENSION = opt.accept_extetion
 
 # Streamlit UI
 st.set_page_config(page_title="Text-to-Speech Generator", layout="wide")
 st.title("Text to speech")
 
-# # Load and encode the image
+# Load and encode the image
 image_path = "static/clound.avif"  # Replace with your image file name
 base64_image = get_base64_image(image_path)
 
@@ -24,25 +26,11 @@ if base64_image:
 
 available_stories_path = glob.glob(f'{AVAILABLE_STORY_DIR}/*.txt')
 available_stories = [i[:-4] for i in os.listdir(AVAILABLE_STORY_DIR)]
+
 # Predefined text files
 PREDEFINED_FILES = dict(zip(available_stories, available_stories_path))
 
-# Define 10 audio styles
-AUDIO_STYLES = {
-    "Bedtime Stories (Style 1)": "bs1",
-    "Science Fiction (Style 1)": "sf1",
-    "Humor & Comedy (Style 1)": "hc1",
-    "Life Lessons (Style 1)": "ll1",
-    "Motivational (Style 1)": "m1",
-    "Bedtime Stories (Style 2)": "bs2",
-    "Science Fiction (Style 2)": "sf2",
-    "Humor & Comedy (Style 2)": "hc2",
-    "Life Lessons (Style 2)": "ll2",
-    "Motivational (Style 2)": "m2"
-}
-
 # Section 1: Choose Input Method
-# st.header("1. Choose Input Method")
 input_method = st.radio("Select an input method:", ["User Input", "Available story"], horizontal=True)
 
 # Input Text Section
@@ -54,42 +42,47 @@ else:
     input_text = load_text_from_file(PREDEFINED_FILES[predefined_option])
     st.text_area("Text Content:", input_text, height=150, disabled=True)
 
-# st.divider()
 
-# Section 2: Choose Style
-st.header("2. Choose Audio Style")
-st.info("Select one of the 10 available audio styles.")
+############################################################################################################
+st.divider()
+st.header("2. Select Language")
+st.info("Choose a language for Text-to-Speech generation.")
+available_languages = {
+    "English": "en",
+    # "French": "fr",
+    # "Spanish": "es",
+    # "German": "de",
+    # "Chinese": "zh",
+    # "Japanese": "ja",
+    # "Korean": "ko"
+}
+selected_language = st.selectbox("Select a language:", list(available_languages.keys()))
+
+# Map the selected language to its language code
+lang_code = available_languages[selected_language]
+
+############################################################################################################
+st.divider()
+# Display audio styles as a dropdown list
+st.header("3. Choose Audio Style")
+
 selected_style = None
 
-# Display 10 styles dynamically in a grid layout
-cols = st.columns(5)  # Split into 5 columns
-style_keys = list(AUDIO_STYLES.keys())
+audio_styles = [item for item in os.listdir(AUDIO_STYLE_DIR) if os.path.isdir(os.path.join(AUDIO_STYLE_DIR, item))]
+col1, col2 = st.columns((3,7))
+with col1:
+    selected_style = st.selectbox("Select an audio style:", audio_styles)
+    st.success(f"Selected style: {selected_style}")
 
-audio_styles_path = glob.glob(f"{AUDIO_STYLE_DIR}/*")
-assert len(audio_styles_path) != AUDIO_STYLES
-# MODIFY HERE
-# audio_styles_path
-style_dict ={key: f"{AUDIO_STYLE_DIR}/{AUDIO_STYLES[key]}.wav" for key in style_keys}
+sample_styles = os.listdir(AUDIO_STYLE_DIR + '/' + selected_style)
+with col2:
+    selected_style_file = st.selectbox("Select an sample style:", sample_styles)
+    selected_audio = os.path.join(AUDIO_STYLE_DIR,selected_style, selected_style_file)
+    st.audio(selected_audio, format="audio/wav")
+    st.success(f"Selected style: {selected_style_file}")
 
-if 'selected_style' not in st.session_state:
-    st.session_state.selected_style = None
-
-# Loop through buttons
-for i, col in enumerate(cols * 2):
-    if i < len(style_keys):
-        with col:
-            if st.button(style_keys[i]):
-                # st.session_state.selected_style = AUDIO_STYLES[style_keys[i]]
-                st.session_state.selected_style = style_keys[i]
-                us_audio = style_dict[style_keys[i]]
-                st.audio(us_audio, format="audio/wav")
-                st.success(f"Selected style: {style_keys[i]}")
-
-# Display the selected style
-if st.session_state.selected_style:
-    st.info(f"Currently selected style: {st.session_state.selected_style}")
+st.divider()
 ############################################################################################################
-
 import os
 import torch
 from TTS.tts.configs.xtts_config import XttsConfig
@@ -167,10 +160,11 @@ def generate_long_audio(input_story, style_audio, save_file, lang='en'):
     for audio_file in audio_files:
         os.remove(audio_file)
 ############################################################################################################
+
 # Section 3: Generate Audio
 # st.divider()
-st.header("3. Generate and Play Audio")
-selected_style = st.session_state.selected_style
+st.header("4. Generate and Play Audio")
+selected_style = AUDIO_STYLE_DIR + '/' +st.session_state.selected_style
 
 # Create a full-width button using Streamlit columns
 if st.button("Generate Audio"):
@@ -178,30 +172,20 @@ if st.button("Generate Audio"):
     if input_text and selected_style:
 
         ############################################################################################################
-        # Modify here - ADD GENERATE AUDIO FUNCTION
         # Generate WAV file
-        # wav_file = "XTTS-v2/samples/de_sample.wav"
-        lang = "en"  # Language code
-        # output_file = f"{OUTPUT_DIR}/output.wav"
-        speaker_audio = style_dict[selected_style]
-        # speaker_audio = os.path.join(repo_path, "samples/pt_sample.wav")  # Replace with a valid path
-        lang = "en"  # Language code
+        speaker_audio = selected_style
+
         output_filename = "output.wav"
         save_path = os.path.join(OUTPUT_DIR, output_filename)
         # Process TTS
-        # process_tts(input_text, speaker_audio, lang, output_file)
         with st.spinner("Generating audio... Please wait."):
-            generate_long_audio(input_text, speaker_audio, save_path)
+            generate_long_audio(input_text, speaker_audio, save_path, lang=lang_code)
 
         ############################################################################################################
         # Show success message and play audio
         st.success(f"Audio generated successfully with style: **{selected_style}**. Playing below:")
         st.audio(save_path, format="audio/wav")
 
-        # Provide download option
-        # with open(output_file, "rb") as file:
-        #     st.download_button("Download WAV File", file, file_name="output.wav", mime="audio/wav")
-        
         # os.unlink(wav_file)  # Clean up temporary file
     elif not input_text:
         st.error("Please enter or select text first.")
