@@ -1,5 +1,5 @@
 # Voice-Synthesis - XTTS-v2
-
+![Image](static/screenshot.png)
 ### How to use
 First, clone the this repo
 ```bash
